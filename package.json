@@ -1,0 +1,19 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "scripts": {
+    "start": " node ./src/App.js",
+    "dev": "nodemon ./src/App.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manickam1024/Devtinder.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manickam1024/Devtinder/issues"
+  },
+  "homepage": "https://github.com/manickam1024/Devtinder#readme",
+  "description": ""
+}
