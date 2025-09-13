@@ -1,0 +1,8 @@
+# Normalize line endings to LF in Git
+* text=auto
+
+# Make sure shell scripts always use LF
+*.sh text eol=lf
+
+# Make sure batch files use CRLF
+*.bat text eol=crlf
