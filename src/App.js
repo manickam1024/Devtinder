@@ -4,6 +4,7 @@ const app = express(); // the above and this is to create the server and listeni
 const { connection } = require("./configurations/database"); //connection to the database
 
 const User = require("./schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
+app.use(express.text());
 
 app.use(express.json()); // this middleware parses the raw byyyytes into json
 
@@ -13,13 +14,24 @@ connection()
 
     app.post("/login", async (req, res) => {
       // it wont be trigeered untill the user (post man u send post with data) request
-      const name = req.body;
+      try {
+        const name = req.body;
+        const newuser = new User(name);
+        const result = await newuser.save(); // adds id and __v (versions) of the document
+        res.send(result);
+      } catch (err) {
+        console.log(err); // for async ops like .send()
+      }
+    });
 
-      const newuser = new User(name);
-
-      const result = await newuser.save();
-
-      res.send(result);
+    app.get("/getuser", async (req, res) => {
+      const name = req.body.firstName;
+      try {
+        const result = await User.findOne({ firstName: name });
+        res.send(result);
+      } catch (err) {
+        console.log(err);
+      }
     });
 
     app.listen(4444, () => {
@@ -27,5 +39,5 @@ connection()
     });
   })
   .catch((err) => {
-    console.log(err);
+    console.log("databse error" + err);
   });
