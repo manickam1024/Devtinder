@@ -1,23 +1,31 @@
 const express = require("express");
+const app = express(); // the above and this is to create the server and listenig at port 4444
 
-const app = express();
+const { connection } = require("./configurations/database"); //connection to the database
 
-const { adminauth } = require("./middlewares/authentication");
+const User = require("./schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
 
-app.use("/admin", adminauth);
+app.use(express.json()); // this middleware parses the raw byyyytes into json
 
-app.post("/admin/addmovie", (req, res) => {
-  res.send(" movie succesfully added to the database ");
-});
+connection()
+  .then(() => {
+    console.log("connected");
 
-app.post("/admin/modifymovie", (req, res) => {
-  res.send("movie is modified successfully");
-});
+    app.post("/login", async (req, res) => {
+      // it wont be trigeered untill the user (post man u send post with data) request
+      const name = req.body;
 
-app.post("/admin/deletemovie", (req, res) => {
-  res.send("movie deleted  successfully");
-});
+      const newuser = new User(name);
 
-app.listen(4444, () => {
-  console.log("server running at 3000");
-});
+      const result = await newuser.save();
+
+      res.send(result);
+    });
+
+    app.listen(4444, () => {
+      console.log("server running at 4444");
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });

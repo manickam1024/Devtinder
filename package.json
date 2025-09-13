@@ -15,5 +15,9 @@
     "url": "https://github.com/manickam1024/Devtinder/issues"
   },
   "homepage": "https://github.com/manickam1024/Devtinder#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.18.1"
+  }
 }
