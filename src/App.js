@@ -20,17 +20,17 @@ connection()
         const result = await newuser.save(); // adds id and __v (versions) of the document
         res.send(result);
       } catch (err) {
-        console.log(err); // for async ops like .send()
+        res.send("defined error " + err); // for async ops like .send()
       }
     });
 
     app.get("/getuser", async (req, res) => {
-      const name = req.body.firstName;
       try {
-        const result = await User.findOne({ firstName: name });
-        res.send(result);
+        const name = req.body.firstName;
+        const user = await User.findOne({ firstName: name });
+        res.send(users);
       } catch (err) {
-        console.log(err);
+        res.send("defined error " + err); // for async ops like .send()
       }
     });
 
@@ -39,5 +39,5 @@ connection()
     });
   })
   .catch((err) => {
-    console.log("databse error" + err);
+    res.send("databse error" + err);
   });
