@@ -59,6 +59,7 @@ connection()
       try {
         const firstName = req.body.firstName;
         const newdata = req.body;
+
         const settled = await User.replaceOne(
           { firstName: firstName },
           newdata,
@@ -79,14 +80,23 @@ connection()
       try {
         const id = req.body._id;
         const newdata = req.body;
-        const settled = await User.findByIdAndUpdate(id, newdata, {
-          // here the leftout feilds are written with previous data because of no overwrite
-          new: true,
-          runValidators: true,
+        const keyofschema = Object.keys(User.schema.paths);
+        const filter = Object.keys(newdata).every((k) => {
+          keyofschema.includes(k);
         });
-        console.log(settled);
+        console.log(filter);
 
-        res.send(settled + "  ...updated");
+        if (filter) {
+          const settled = await User.findByIdAndUpdate(id, newdata, {
+            // here the leftout feilds are written with previous data because of no overwrite
+            new: true,
+            runValidators: true,
+          });
+
+          res.send(settled + "  ...updated");
+        } else {
+          res.send("invalid fields entered");
+        }
       } catch (err) {
         res.send("defined error " + err); // for async ops like .send()
       }

@@ -37,6 +37,16 @@ const schema = new mongoose.Schema(
         }
       },
     },
+    skills: {
+      type: [String],
+      maxxlenght: 10,
+      validate(arr) {
+        if (!arr.length <= 10) {
+          throw Error("maximun skills are 10");
+        }
+        // or return arr.length <= 10;
+      },
+    },
   },
   {
     timestamps: true,
