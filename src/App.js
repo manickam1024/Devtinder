@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express(); // the above and this is to create the server and listenig at port 4444
+const bcrypt = require("bcrypt");
+const npmvalidator = require("validator");
 
 const { connection } = require("./configurations/database"); //connection to the database
 
@@ -15,10 +17,16 @@ connection()
     app.post("/register", async (req, res) => {
       // it wont be trigeered untill the user (post man u send post with data) request
       try {
-        const name = req.body;
-        const newuser = new User(name);
-        const result = await newuser.save(); // adds id and __v (versions) of the document
-        res.send(result);
+        const { password, ...rest } = req.body;
+        if (!npmvalidator.isStrongPassword(password)) {
+          res.send("enter a strong password");
+        } else {
+          const hashed = (await bcrypt.hash(password, 10)).toString();
+          const newuser = new User({ ...rest, password: hashed });
+
+          const result = await newuser.save(); // adds id and __v (versions) of the document
+          res.send(result);
+        }
       } catch (err) {
         res.send("defined error " + err); // for async ops like .send()
       }
