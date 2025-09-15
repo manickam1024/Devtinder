@@ -12,7 +12,7 @@ connection()
   .then(() => {
     console.log("connected");
 
-    app.post("/login", async (req, res) => {
+    app.post("/register", async (req, res) => {
       // it wont be trigeered untill the user (post man u send post with data) request
       try {
         const name = req.body;
@@ -24,14 +24,77 @@ connection()
       }
     });
 
-    app.get("/getuser", async (req, res) => {
+    app.get("/getUser", async (req, res) => {
       try {
         const name = req.body.firstName;
         const user = await User.findOne({ firstName: name });
-        res.send(users);
+        res.send(user);
       } catch (err) {
         res.send("defined error " + err); // for async ops like .send()
       }
+    });
+
+    app.delete("/delete", async (req, res) => {
+      try {
+        const id = req.body._id;
+        const settled = await User.findByIdAndDelete(id);
+        res.send(settled + "  .................deleted");
+      } catch (err) {
+        res.send("defined error " + err); // for async ops like .send()
+      }
+    });
+
+    app.delete("/deleteMany", async (req, res) => {
+      try {
+        const name = req.body.firstName;
+        console.log(name);
+        const settled = await User.deleteMany({ firstName: name });
+        res.send(settled + "  .................deleted");
+      } catch (err) {
+        res.send("defined error " + err); // for async ops like .send()
+      }
+    });
+
+    app.put("/updateEverything", async (req, res) => {
+      try {
+        const firstName = req.body.firstName;
+        const newdata = req.body;
+        const settled = await User.replaceOne(
+          { firstName: firstName },
+          newdata,
+          {
+            //here the leftout fields are written null
+            new: true,
+            overwrite: true,
+            strict: false,
+          },
+        );
+        res.send(settled + "  ...updated");
+      } catch (err) {
+        res.send("defined error " + err); // for async ops like .send()
+      }
+    });
+
+    app.patch("/updatePart", async (req, res) => {
+      try {
+        const id = req.body._id;
+        const newdata = req.body;
+        const settled = await User.findByIdAndUpdate(id, newdata, {
+          // here the leftout feilds are written with previous data because of no overwrite
+          new: true,
+          runValidators: true,
+        });
+        console.log(settled);
+
+        res.send(settled + "  ...updated");
+      } catch (err) {
+        res.send("defined error " + err); // for async ops like .send()
+      }
+    });
+
+    app.head("/ping", (req, res) => {
+      res.send();
+      // No body, just headers + status
     });
 
     app.listen(4444, () => {
@@ -39,5 +102,5 @@ connection()
     });
   })
   .catch((err) => {
-    res.send("databse error" + err);
+    console.log("databse error" + err);
   });
