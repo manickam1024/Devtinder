@@ -7,10 +7,11 @@ const User = require("./schema/user"); // this is the instance of the model whic
 const encryption = require("./utils/encryption");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const CookieParser = require("cookieparser");
+const CookieParser = require("cookie-parser");
 
 app.use(express.text());
 app.use(express.json()); // this middleware parses the raw byyyytes into json
+app.use(CookieParser());
 
 connection()
   .then(() => {
@@ -33,31 +34,46 @@ connection()
         const { password, email } = req.body;
 
         if (!email || !password) {
-          res.send(" email or password cannot be empty ");
-        } else {
-          const match = await User.findOne({ email: email });
-          if (!match) {
-            res.send("invalid credentials");
-          } else {
-            const ismatch = await bcrypt.compare(password, match.password);
-            if (ismatch) {
-              const token = jwt.sign({ myid: match._id }, "User@123");
-              res.cookie(token);
-              res.send("logged in succesufullly");
-            } else {
-              res.send("invalid credentials");
-            }
-          }
+          return res.send("email or password cannot be empty");
         }
+
+        const match = await User.findOne({ email });
+        if (!match) {
+          return res.send("invalid credentials");
+        }
+
+        const ismatch = await bcrypt.compare(password, match.password);
+        if (!ismatch) {
+          return res.send("invalid credentials");
+        }
+
+        const token = jwt.sign({ myid: match._id.toString() }, "User@123", {
+          expiresIn: "1h",
+        });
+
+        res.cookie("token", token);
+
+        res.send("logged in successfully");
       } catch (err) {
-        res.send("defined error " + err); // for async ops like .send()
+        res.send("defined error " + err);
       }
     });
-    app.get("/getUser", async (req, res) => {
+
+    app.get("/profile", async (req, res) => {
       try {
-        const name = req.body.firstName;
-        const user = await User.findOne({ firstName: name });
-        res.send(user);
+        const token = req.cookies.token;
+        if (!token) {
+          res.send("login again");
+        } else {
+          console.log("1");
+
+          const parsedtoken = await jwt.verify(token, "User@123");
+          console.log("2");
+
+          const id = parsedtoken.myid;
+          const user = await User.findOne({ _id: id });
+          res.send(user);
+        }
       } catch (err) {
         res.send("defined error " + err); // for async ops like .send()
       }
