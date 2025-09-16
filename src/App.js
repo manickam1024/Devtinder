@@ -11,7 +11,6 @@ const CookieParser = require("cookieparser");
 
 app.use(express.text());
 app.use(express.json()); // this middleware parses the raw byyyytes into json
-app.use(CookieParser);
 
 connection()
   .then(() => {
@@ -42,6 +41,8 @@ connection()
           } else {
             const ismatch = await bcrypt.compare(password, match.password);
             if (ismatch) {
+              const token = jwt.sign({ myid: match._id }, "User@123");
+              res.cookie(token);
               res.send("logged in succesufullly");
             } else {
               res.send("invalid credentials");
