@@ -5,9 +5,13 @@ const { connection } = require("./configurations/database"); //connection to the
 
 const User = require("./schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
 const encryption = require("./utils/encryption");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const CookieParser = require("cookieparser");
 
 app.use(express.text());
 app.use(express.json()); // this middleware parses the raw byyyytes into json
+app.use(CookieParser);
 
 connection()
   .then(() => {
@@ -25,7 +29,29 @@ connection()
         res.send("defined error " + err); // for async ops like .send()
       }
     });
+    app.post("/login", async (req, res) => {
+      try {
+        const { password, email } = req.body;
 
+        if (!email || !password) {
+          res.send(" email or password cannot be empty ");
+        } else {
+          const match = await User.findOne({ email: email });
+          if (!match) {
+            res.send("invalid credentials");
+          } else {
+            const ismatch = await bcrypt.compare(password, match.password);
+            if (ismatch) {
+              res.send("logged in succesufullly");
+            } else {
+              res.send("invalid credentials");
+            }
+          }
+        }
+      } catch (err) {
+        res.send("defined error " + err); // for async ops like .send()
+      }
+    });
     app.get("/getUser", async (req, res) => {
       try {
         const name = req.body.firstName;
