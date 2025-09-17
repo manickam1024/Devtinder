@@ -20,7 +20,7 @@ connection()
     app.post("/register", async (req, res) => {
       // it wont be trigeered untill the user (post man u send post with data) request
       try {
-        const { password, ...rest } = req.body;
+        const { password, ...rest } = req.body; // instead of destructing all the fields use ...rest
         const hashed = await encryption(password, res); // await because whever i call encryption interally a promise is called ,but js goes to execute next line
         const newuser = new User({ ...rest, password: hashed });
         const result = await newuser.save(); // adds id and __v (versions) of the document
@@ -34,20 +34,21 @@ connection()
         const { password, email } = req.body;
 
         if (!email || !password) {
-          return res.send("email or password cannot be empty");
+          return res.send("email or password cannot be empty"); //authentication
         }
 
-        const match = await User.findOne({ email });
+        const match = await User.findOne({ email }); // finding wheather my email exists in the db or not if yes return the document
         if (!match) {
-          return res.send("invalid credentials");
+          return res.send("invalid credentials"); //authorization
         }
 
-        const ismatch = await bcrypt.compare(password, match.password);
+        const ismatch = await bcrypt.compare(password, match.password); // the hashed password in the database and the plain password entered by the user
         if (!ismatch) {
-          return res.send("invalid credentials");
+          return res.send("invalid credentials"); // im not exposing which one is wrong to prevent data breach /leak
         }
 
-        const token = jwt.sign({ myid: match._id.toString() }, "User@123", {
+        const token = jwt.sign({ myid: match._id }, "User@123", {
+          // if the user is authenticated then next step is to  create a token
           expiresIn: "1h",
         });
 
@@ -62,14 +63,11 @@ connection()
     app.get("/profile", async (req, res) => {
       try {
         const token = req.cookies.token;
+        console.log(token);
         if (!token) {
           res.send("login again");
         } else {
-          console.log("1");
-
           const parsedtoken = await jwt.verify(token, "User@123");
-          console.log("2");
-
           const id = parsedtoken.myid;
           const user = await User.findOne({ _id: id });
           res.send(user);
