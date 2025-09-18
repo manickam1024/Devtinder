@@ -3,11 +3,11 @@ const app = express(); // the above and this is to create the server and listeni
 
 const { connection } = require("./configurations/database"); //connection to the database
 
-const User = require("./schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
+const { User } = require("./schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
 const encryption = require("./utils/encryption");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const CookieParser = require("cookie-parser");
+const userAuth = require("./middlewares/authentication");
 
 app.use(express.text());
 app.use(express.json()); // this middleware parses the raw byyyytes into json
@@ -23,7 +23,7 @@ connection()
         const { password, ...rest } = req.body; // instead of destructing all the fields use ...rest
         const hashed = await encryption(password, res); // await because whever i call encryption interally a promise is called ,but js goes to execute next line
         const newuser = new User({ ...rest, password: hashed });
-        const result = await newuser.save(); // adds id and __v (versions) of the document
+        const result = await newuser.save(); // inserts the document into db and adds id and __v (versions) of the document
         res.send(result);
       } catch (err) {
         res.send("defined error " + err); // for async ops like .send()
@@ -32,48 +32,35 @@ connection()
     app.post("/login", async (req, res) => {
       try {
         const { password, email } = req.body;
-
         if (!email || !password) {
           return res.send("email or password cannot be empty"); //authentication
         }
-
-        const match = await User.findOne({ email }); // finding wheather my email exists in the db or not if yes return the document
-        if (!match) {
-          return res.send("invalid credentials"); //authorization
+        const document = await User.findOne({ email }); // finding wheather my email exists in the db or not if yes return the document
+        if (!document) {
+          return res.send("invalid credentials"); // instead of if else if use return to stop the execution
         }
 
-        const ismatch = await bcrypt.compare(password, match.password); // the hashed password in the database and the plain password entered by the user
-        if (!ismatch) {
+        const verifedUser = await document.passwordVerification(password); // this function returns promise
+        if (!verifedUser) {
           return res.send("invalid credentials"); // im not exposing which one is wrong to prevent data breach /leak
         }
-
-        const token = jwt.sign({ myid: match._id }, "User@123", {
-          // if the user is authenticated then next step is to  create a token
-          expiresIn: "1h",
-        });
-
-        res.cookie("token", token);
-
+        const token = await document.jwtCreation(); // creating the token if the user is authenticated
+        res.cookie("token", token); //creating and sending the cookie to browser
         res.send("logged in successfully");
       } catch (err) {
         res.send("defined error " + err);
       }
     });
 
-    app.get("/profile", async (req, res) => {
+    app.get("/profile", userAuth, async (req, res) => {
       try {
-        const token = req.cookies.token;
-        console.log(token);
-        if (!token) {
-          res.send("login again");
-        } else {
-          const parsedtoken = await jwt.verify(token, "User@123");
-          const id = parsedtoken.myid;
-          const user = await User.findOne({ _id: id });
-          res.send(user);
+        const id = req.id; // coming from the middleware userAuth
+        const user = await User.findOne({ _id: id });
+        if (user) {
+          res.send(user); //sending the user details to the user
         }
       } catch (err) {
-        res.send("defined error " + err); // for async ops like .send()
+        res.send("defined error " + err); // for async ops like .send(), jwt.verify is also async
       }
     });
 
@@ -107,9 +94,9 @@ connection()
           { firstName: firstName },
           newdata,
           {
-            //here the leftout fields are written null
             new: true,
-            overwrite: true,
+            overwrite: true, //here the leftout fields are written null
+
             strict: false,
           },
         );
@@ -125,6 +112,7 @@ connection()
         const newdata = req.body;
         const keyofschema = Object.keys(User.schema.paths);
         const filter = Object.keys(newdata).every((k) => {
+          // here we r checking wheather the keys entered by the user are present in the schema or not. it returns true or false
           keyofschema.includes(k);
         });
         console.log(filter);
@@ -132,6 +120,7 @@ connection()
         if (filter) {
           const settled = await User.findByIdAndUpdate(id, newdata, {
             // here the leftout feilds are written with previous data because of no overwrite
+            // the modifers are compared automatically only validators are explicitly mentioned
             new: true,
             runValidators: true,
           });

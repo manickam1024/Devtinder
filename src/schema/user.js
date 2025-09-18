@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const schema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -58,6 +60,33 @@ const schema = new mongoose.Schema(
   },
 );
 
-const User = mongoose.model("users", schema); //
+try {
+  //it can be written in login api itself but to keep the code clean im writing it here
+  userSchema.methods.passwordVerification = async function (password) {
+    console.log("inside passwordVerification");
 
-module.exports = User;
+    const document = this; // this refers to the document on which this method is called
+    const ismatch = await bcrypt.compare(password, document.password); // the plain password entered by the user and the hashed password in the database and
+    return ismatch; // it returns true or false
+  };
+} catch (err) {
+  console.log("error in password verification method" + err);
+}
+
+try {
+  userSchema.methods.jwtCreation = function () {
+    console.log("inside jwtCreation");
+    const document = this; // this refers to the document on which this method is called
+    const token = jwt.sign({ myid: document._id }, "User@123", {
+      // if the user is authenticated then next step is to  create a token
+      expiresIn: "1h",
+    });
+    return token;
+  };
+} catch (err) {
+  console.log("error in jwt creation method" + err);
+}
+
+const User = mongoose.model("users", userSchema);
+
+module.exports = { User };
