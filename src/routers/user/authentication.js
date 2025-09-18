@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../../schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
 const encryption = require("../../utils/encryption");
+const emailandpassverification = require("../../utils/emailandpasswordverification");
 
 router.post("/register", async (req, res) => {
   // it wont be trigeered untill the user (post man u send post with data) request
@@ -21,23 +22,17 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.send("email or password cannot be empty"); //authentication
     }
-    const document = await User.findOne({ email }); // finding wheather my email exists in the db or not if yes return the document
-    if (!document) {
-      return res.send("invalid credentials"); // instead of if else if use return to stop the execution
-    }
-
-    const isverifedUser = await document.passwordVerification(password);
-    console.log(document.passwordVerification);
-    if (!isverifedUser) {
-      return res.send("invalid credentials"); // im not exposing which one is wrong to prevent data breach /leak
-    }
-    const token = await document.jwtCreation(); // creating the token if the user is authenticated
+    const token = await emailandpassverification(email, password); // just to simplify and make code look clean
+    console.log("token generated is " + token);
     res.cookie("token", token); //creating and sending the cookie to browser
     res.send("logged in successfully");
   } catch (err) {
-    res.send("defined error " + err);
+    res.send("error while email and password verification " + err); // for async ops like .send()
   }
 });
-router.post("/logout", (req, res) => {});
+router.post("/logout", (req, res) => {
+  res.clearCookie("token"); // just clearing the cookie
+  res.send("logged out successfully");
+});
 
 module.exports = router;

@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../../schema/user");
 const userAuth = require("../../middlewares/authentication");
+const isallowed = require("../../utils/allowedfields");
 
 router.get("/getprofile", userAuth, async (req, res) => {
   try {
-    const id = req.id; // coming from the middleware userAuth
-    const user = await User.findOne({ _id: id });
+    const user = req.user; // coming from the middleware userAuth
     if (user) {
       res.send(user); //sending the user details to the user
     }
@@ -14,7 +14,7 @@ router.get("/getprofile", userAuth, async (req, res) => {
     res.send("defined error " + err); // for async ops like .send(), jwt.verify is also async
   }
 });
-router.put("/updateEverything", async (req, res) => {
+router.put("/updateEverything", userAuth, async (req, res) => {
   try {
     const firstName = req.body.firstName;
     const newdata = req.body;
@@ -34,28 +34,22 @@ router.put("/updateEverything", async (req, res) => {
     res.send("defined error " + err); // for async ops like .send()
   }
 });
-router.patch("/updatePart", async (req, res) => {
+router.patch("/updatePart", userAuth, async (req, res) => {
   try {
     const id = req.body._id;
     const newdata = req.body;
-    const keyofschema = Object.keys(User.schema.paths);
-    const filter = Object.keys(newdata).every((k) => {
-      // here we r checking wheather the keys entered by the user are present in the schema or not. it returns true or false
-      keyofschema.includes(k);
-    });
-    console.log(filter);
+    isallowed = isallowed(req); // it checks wheather the fields entered by user are allowed to be updated or not
 
-    if (filter) {
+    if (isallowed) {
       const settled = await User.findByIdAndUpdate(id, newdata, {
-        // here the leftout feilds are written with previous data because of no overwrite
-        // the modifers are compared automatically only validators are explicitly mentioned
         new: true,
-        runValidators: true,
+        runValidators: true, // here the leftout feilds are written with previous data because of no overwrite
+        // the modifers are compared automatically only validators are explicitly mentioned
       });
 
       res.send(settled + "  ...updated");
     } else {
-      res.send("invalid fields entered");
+      res.send("fields email,password cannot be edited");
     }
   } catch (err) {
     res.send("defined error " + err); // for async ops like .send()
