@@ -40,8 +40,9 @@ connection()
           return res.send("invalid credentials"); // instead of if else if use return to stop the execution
         }
 
-        const verifedUser = await document.passwordVerification(password); // this function returns promise
-        if (!verifedUser) {
+        const isverifedUser = await document.passwordVerification(password);
+        console.log(document.passwordVerification);
+        if (!isverifedUser) {
           return res.send("invalid credentials"); // im not exposing which one is wrong to prevent data breach /leak
         }
         const token = await document.jwtCreation(); // creating the token if the user is authenticated
