@@ -34,5 +34,5 @@ connection()
     });
   })
   .catch((err) => {
-    console.log("databse error" + err);
+    console.log("databse error at app.js " + err);
   });

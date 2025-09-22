@@ -12,6 +12,7 @@ router.get("/getprofile", userAuth, async (req, res) => {
     }
   } catch (err) {
     res.send("defined error " + err); // for async ops like .send(), jwt.verify is also async
+    console.log("error at profile.js /getprofile");
   }
 });
 router.put("/updateEverything", userAuth, async (req, res) => {
@@ -32,6 +33,7 @@ router.put("/updateEverything", userAuth, async (req, res) => {
     res.send(settled + "  ...updated");
   } catch (err) {
     res.send("defined error " + err); // for async ops like .send()
+    console.log("error at profile.js /UpdateEverything");
   }
 });
 router.patch("/updatePart", userAuth, async (req, res) => {
@@ -53,8 +55,9 @@ router.patch("/updatePart", userAuth, async (req, res) => {
     }
   } catch (err) {
     res.send("defined error " + err); // for async ops like .send()
+    console.log("error at profile.js /updatePart");
   }
 });
-router.patch("/password", userAuth, (req, res) => {});
+router.patch("/UpdatePassword", userAuth, (req, res) => {});
 
 module.exports = router;

@@ -69,6 +69,7 @@ try {
   };
 } catch (err) {
   throw "error in password verification method" + err;
+  console.log("error at user.js passwordVerification schema method ");
 }
 
 try {
@@ -81,6 +82,7 @@ try {
   };
 } catch (err) {
   throw "error in jwt creation method" + err;
+  console.log("error at user.js jwtCreation schema method ");
 }
 
 const User = mongoose.model("users", userSchema);

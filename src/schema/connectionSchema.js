@@ -23,8 +23,8 @@ connectionSchema.pre("save", async function (next) {
 
     const exists = await Connection.findOne({
       $or: [
-        { fromid: document.fromid, toid: document.toid },
-        { fromid: document.toid, toid: document.fromid },
+        { fromid: document.fromid, toid: document.toid }, // if request exists already from sender side
+        { fromid: document.toid, toid: document.fromid }, // if request exists already from recevier side
       ],
     });
 
@@ -35,6 +35,8 @@ connectionSchema.pre("save", async function (next) {
 
     next();
   } catch (err) {
+    console.log("error at connectionSchema.js");
+
     next(err); // unexpected errors
   }
 });

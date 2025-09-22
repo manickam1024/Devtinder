@@ -19,6 +19,7 @@ const userAuth = async (req, res, next) => {
     next();
   } catch (err) {
     return res.status(401).send("Invalid or expired token"); //here i have the token but it is invalid
+    console.log("error at authentication.js ");
   }
 };
 

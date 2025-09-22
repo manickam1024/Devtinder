@@ -14,6 +14,7 @@ router.post("/register", async (req, res) => {
     res.send(result);
   } catch (err) {
     res.send("defined error " + err); // for async ops like .send()
+    console.log("error at authentication.js /register");
   }
 });
 router.post("/login", async (req, res) => {
@@ -28,11 +29,16 @@ router.post("/login", async (req, res) => {
     res.send("logged in successfully");
   } catch (err) {
     res.send("error while email and password verification " + err); // for async ops like .send()
+    console.log("error at authentication.js /login");
   }
 });
 router.post("/logout", (req, res) => {
-  res.clearCookie("token"); // just clearing the cookie
-  res.send("logged out successfully");
+  try {
+    res.clearCookie("token"); // just clearing the cookie
+    res.send("logged out successfully");
+  } catch (err) {
+    console.log("error at authentication.js /logout");
+  }
 });
 
 module.exports = router;
