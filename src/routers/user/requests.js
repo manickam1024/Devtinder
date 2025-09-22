@@ -1,10 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../../schema/user"); // this is the instance of the model which contains the schema using this instnace we insert the data
+const Connection = require("../../schema/connectionSchema"); //
+const userAuth = require("../../middlewares/authentication");
 
-router.post("/sent/intrested", () => {});
+router.post("/sent/intrested/:toid", userAuth, async (req, res) => {
+  try {
+    const fromid = req.user._id;
+    const toid = req.params.toid;
+    const status = "intrested";
+    const newreq = new Connection({ fromid, toid, status });
+    await newreq.save();
+    res.send("saved successfully");
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
 router.post("/sent/notintrested", () => {});
-router.post("/review/accepted", () => {}); // the requests i have got from other users
-router.post("/review/rejected", () => {});
 
 module.exports = router;

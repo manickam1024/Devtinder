@@ -1,0 +1,43 @@
+const mongoose = require("mongoose");
+
+const connectionSchema = new mongoose.Schema(
+  {
+    fromid: { type: mongoose.Schema.Types.ObjectId, required: true },
+    toid: { type: mongoose.Schema.Types.ObjectId, required: true },
+    status: { type: String },
+  },
+  { timestamps: true },
+);
+
+connectionSchema.pre("save", async function (next) {
+  // this can be done at api level itself ,but you u give request from other api u need to validate or rewrite again
+  try {
+    const document = this;
+
+    if (document.fromid.toString() === document.toid.toString()) {
+      // checks if from and to is equal
+      // or .equals()
+      const err = new Error("cannot send request to yourself");
+      return next(err); // stops save
+    }
+
+    const exists = await Connection.findOne({
+      $or: [
+        { fromid: document.fromid, toid: document.toid },
+        { fromid: document.toid, toid: document.fromid },
+      ],
+    });
+
+    if (exists) {
+      const err = new Error("Duplicate request");
+      return next(err); // stops save
+    }
+
+    next();
+  } catch (err) {
+    next(err); // unexpected errors
+  }
+});
+
+const Connection = mongoose.model("Connection", connectionSchema);
+module.exports = Connection;
