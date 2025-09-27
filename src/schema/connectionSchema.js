@@ -14,26 +14,35 @@ connectionSchema.pre("save", async function (next) {
   try {
     const document = this;
 
-    if (document.fromid.toString() === document.toid.toString()) {
-      // checks if from and to is equal
-      // or .equals()
-      const err = new Error("cannot send request to yourself");
-      return next(err); // stops save
-    }
+    const res = document.status === "intrested" || "notIntrested";
 
-    const exists = await Connection.findOne({
-      $or: [
-        { fromid: document.fromid, toid: document.toid }, // if request exists already from sender side
-        { fromid: document.toid, toid: document.fromid }, // if request exists already from recevier side
-      ],
-    });
+    res &&
+      (async () => {
+        if (document.fromid.toString() === document.toid.toString()) {
+          // checks if from and to is equal
+          // or .equals()
+          const err = new Error(
+            "cannot send request to yourself msg from:  connectionschema pre hook",
+          );
+          return next(err); // stops save
+        }
 
-    if (exists) {
-      const err = new Error("Duplicate request");
-      return next(err); // stops save
-    }
+        const exists = await Connection.findOne({
+          $or: [
+            { fromid: document.fromid, toid: document.toid }, // if request exists already from sender side
+            { fromid: document.toid, toid: document.fromid }, // if request exists already from recevier side
+          ],
+        });
 
-    next();
+        if (exists) {
+          const err = new Error(
+            "Duplicate request msg from: connectionschema pre hook",
+          );
+          return next(err); // stops save
+        }
+
+        next();
+      });
   } catch (err) {
     console.log("error at connectionSchema.js");
 
