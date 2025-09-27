@@ -7,11 +7,11 @@ const app = express();
 const { connection } = require("./configurations/database");
 
 // importing the routes
-const userAuth = require("./routers/user/authentication");
+const registerandauth = require("./routers/user/userAuth");
 const profile = require("./routers/user/profile");
 const adminDelete = require("./routers/admin/deleteUser");
 const connections = require("./routers/user/connections");
-const request = require("./routers/user/requests");
+const request = require("./routers/user/reqlist");
 
 // middlewares for parsing
 const CookieParser = require("cookie-parser");
@@ -23,7 +23,7 @@ connection()
   .then(() => {
     console.log("database is connected");
 
-    app.use("/auth", userAuth);
+    app.use("/auth", registerandauth);
     app.use("/profile", profile);
     app.use("/admin", adminDelete);
     app.use("/connection", connections);

@@ -24,12 +24,11 @@ router.post("/login", async (req, res) => {
       return res.send("email or password cannot be empty"); //authentication
     }
     const token = await emailandpassverification(email, password); // just to simplify and make code look clean
-    console.log("token generated is " + token);
     res.cookie("token", token); //creating and sending the cookie to browser
     res.send("logged in successfully");
   } catch (err) {
-    res.send("error while email and password verification " + err); // for async ops like .send()
-    console.log("error at authentication.js /login");
+    console.log("error at router/user/userAuth.js /login");
+    res.send("invalid credentials"); // for async ops like .send()
   }
 });
 router.post("/logout", (req, res) => {
@@ -37,7 +36,7 @@ router.post("/logout", (req, res) => {
     res.clearCookie("token"); // just clearing the cookie
     res.send("logged out successfully");
   } catch (err) {
-    console.log("error at authentication.js /logout");
+    console.log("error at userAuth.js /logout");
   }
 });
 

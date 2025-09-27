@@ -11,8 +11,9 @@ router.get("/getprofile", userAuth, async (req, res) => {
       res.send(user); //sending the user details to the user
     }
   } catch (err) {
-    res.send("defined error " + err); // for async ops like .send(), jwt.verify is also async
     console.log("error at profile.js /getprofile");
+
+    res.send("defined error " + err); // for async ops like .send(), jwt.verify is also async
   }
 });
 router.put("/updateEverything", userAuth, async (req, res) => {
@@ -28,12 +29,13 @@ router.put("/updateEverything", userAuth, async (req, res) => {
         overwrite: true, //here the leftout fields are written null
 
         strict: false,
-      },
+      }
     );
     res.send(settled + "  ...updated");
   } catch (err) {
-    res.send("defined error " + err); // for async ops like .send()
     console.log("error at profile.js /UpdateEverything");
+
+    res.send("defined error " + err); // for async ops like .send()
   }
 });
 router.patch("/updatePart", userAuth, async (req, res) => {
@@ -54,8 +56,9 @@ router.patch("/updatePart", userAuth, async (req, res) => {
       res.send("fields email,password cannot be edited");
     }
   } catch (err) {
-    res.send("defined error " + err); // for async ops like .send()
     console.log("error at profile.js /updatePart");
+
+    res.send("defined error " + err); // for async ops like .send()
   }
 });
 router.patch("/UpdatePassword", userAuth, (req, res) => {});

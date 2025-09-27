@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
       minLength: 3,
-      maxLength: 10,
+      maxLength: 50,
     },
     lastName: {
       type: String,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
       minLength: 1,
-      maxLength: 5,
+      maxLength: 30,
     },
     email: {
       type: String,
@@ -57,20 +57,8 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
-
-try {
-  //it can be written in login api itself but to keep the code clean im writing it here
-  userSchema.methods.passwordVerification = async function (password) {
-    const document = this; // this refers to the document on which this method is called
-    const ismatch = await bcrypt.compare(password, document.password); // the plain password entered by the user and the hashed password in the database and
-    return ismatch; // it returns true or false
-  };
-} catch (err) {
-  throw "error in password verification method" + err;
-  console.log("error at user.js passwordVerification schema method ");
-}
 
 try {
   userSchema.methods.jwtCreation = function () {
@@ -81,8 +69,9 @@ try {
     return token;
   };
 } catch (err) {
-  throw "error in jwt creation method" + err;
   console.log("error at user.js jwtCreation schema method ");
+
+  throw "error in jwt creation method" + err;
 }
 
 const User = mongoose.model("users", userSchema);

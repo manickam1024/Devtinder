@@ -15,11 +15,12 @@ const userAuth = async (req, res, next) => {
     if (!user) {
       console.log("User not found at userAuth");
     }
+
     req.user = user;
     next();
   } catch (err) {
-    return res.status(401).send("Invalid or expired token"); //here i have the token but it is invalid
     console.log("error at authentication.js ");
+    return res.status(401).send("Invalid or expired token"); //here i have the token but it is invalid
   }
 };
 
