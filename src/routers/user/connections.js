@@ -7,11 +7,12 @@ router.post("/sent/:status/:toid", userAuth, async (req, res) => {
   try {
     const fromid = req.user._id;
     const toid = req.params.toid;
+    const toname = req.user.firstName;
     const status = req.params.status;
     const allowedStatus = ["interested", "notInterested"];
     const includes = allowedStatus.includes(status);
     if (includes) {
-      const newreq = new Connection({ fromid, toid, status });
+      const newreq = new Connection({ fromid, toid, toname, status });
       await newreq.save(); // checks wheather it has any pre and post hooks
       res.send("saved successfully");
     } else {

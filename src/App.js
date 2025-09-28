@@ -12,6 +12,7 @@ const profile = require("./routers/user/profile");
 const adminDelete = require("./routers/admin/deleteUser");
 const connections = require("./routers/user/connections");
 const request = require("./routers/user/reqlist");
+const feed = require("./routers/user/feed");
 
 // middlewares for parsing
 const CookieParser = require("cookie-parser");
@@ -28,6 +29,7 @@ connection()
     app.use("/admin", adminDelete);
     app.use("/connection", connections);
     app.use("/user", request);
+    app.use("/home", feed);
 
     app.listen(4444, () => {
       console.log("server running at 4444");

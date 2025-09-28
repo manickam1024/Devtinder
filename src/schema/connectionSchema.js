@@ -12,6 +12,10 @@ const connectionSchema = new mongoose.Schema(
       required: true,
       ref: "users",
     },
+    toname: {
+      type: String,
+      required: true,
+    },
     status: { type: String },
   },
   { timestamps: true }
