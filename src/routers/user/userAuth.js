@@ -21,14 +21,14 @@ router.post("/login", async (req, res) => {
   try {
     const { password, email } = req.body;
     if (!email || !password) {
-      return res.send("email or password cannot be empty"); //authentication
+      return res.status(401).send("email or password cannot be empty"); //authentication
     }
     const token = await emailandpassverification(email, password); // just to simplify and make code look clean
-    res.cookie("token", token); //creating and sending the cookie to browser
+    res.cookie("token", token, { httpOnly: true }); //creating and sending the cookie to browser
     res.send("logged in successfully");
   } catch (err) {
     console.log("error at router/user/userAuth.js /login");
-    res.send("invalid credentials"); // for async ops like .send()
+    res.status(401).send("invalid credentials"); // for async ops like .send()
   }
 });
 router.post("/logout", (req, res) => {

@@ -1,6 +1,7 @@
 // the below is to import and create the server and which is listening at port 4444
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 //connection to the database
 
@@ -19,6 +20,12 @@ const CookieParser = require("cookie-parser");
 app.use(express.text());
 app.use(express.json()); // this middleware parses the raw byyyytes into json
 app.use(CookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 connection()
   .then(() => {
@@ -36,5 +43,5 @@ connection()
     });
   })
   .catch((err) => {
-    console.log("databse error at app.js " + err);
+    console.log("databse error at App.js " + err);
   });

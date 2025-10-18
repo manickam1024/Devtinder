@@ -7,10 +7,13 @@ const exceptionList = require("../../utils/exceptionlist");
 router.get("/feed", userAuth, async (req, res) => {
   try {
     const List = await exceptionList(req, res);
+    const page = req.query.page;
+    const skip = (page - 1) * page || 0;
+    const limit = req.query.limit || 3;
     const result = await User.find(
       { _id: { $nin: List } }, //filter
       { _id: 1, firstName: 1 }, //projection
-      { limit: 0 } //options-get only 10 users
+      { limit: limit, skip: skip } //options-get only 10 users
     ); //  $notin makes the mangoose to validate the users against the exceptionlist and make sures its not selected,{ _id: 1 }-this is to oly include _id and firstName
 
     res.send(result);
